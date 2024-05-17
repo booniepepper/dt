@@ -10,7 +10,7 @@ if [[ $DT_ROOT != dev/.. ]]; then
   >&2 echo "ERROR: $0 is intended to be run when developing dt."
   >&2 echo "If you're just trying to run a dt built from source:"
   >&2 echo "- Navigate to $DT_ROOT"
-  >&2 echo "- Run './build release' to compile a release executable (Requires Zig 0.11.*)"
+  >&2 echo "- Run './build release' to compile a release executable (Expects Zig 0.12)"
   >&2 echo "- Use the result at: $DT"
   exit 1
 fi

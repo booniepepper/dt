@@ -1,5 +1,6 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
+const osExit = if (@hasDecl(std, "posix")) std.posix.exit else std.os.exit;
 
 const builtins = @import("builtins.zig");
 
@@ -7,7 +8,7 @@ const interpret = @import("interpret.zig");
 const DtMachine = interpret.DtMachine;
 
 // TODO: Change to @import when it's supported for zon
-pub const version = "1.3.1"; // Update in build.zig.zon as well.
+pub const version = "2.0.0-rc"; // Update in build.zig.zon as well.
 
 const stdlib = @embedFile("stdlib.dt");
 const dtlib = @embedFile("dt.dt");
@@ -35,46 +36,21 @@ pub fn main() !void {
         if (try readShebangFile(arena.allocator(), firstArg)) |fileContents| {
             return dt.loadFile(fileContents) catch |e| return doneOrDie(&dt, e);
         } else if ((std.mem.eql(u8, firstArg, "--stream") or std.mem.startsWith(u8, firstArg, "--stream ")) and (stdinPiped or stdoutPiped)) {
-            return handlePipedStdoutOnly(&dt);
+            dt.handleCmd("dt/run-args") catch |e| return doneOrDie(&dt, e);
         }
     }
 
     if (stdinPiped) {
-        return handlePipedStdin(&dt);
-    } else if (stdoutPiped) {
-        return handlePipedStdoutOnly(&dt);
+        dt.handleCmd("dt/pipe-thru-args") catch |e| return doneOrDie(&dt, e);
+    } else {
+        dt.handleCmd("dt/run-args") catch |e| return doneOrDie(&dt, e);
     }
-
-    return readEvalPrintLoop(&dt);
 }
 
 fn readFirstArg(allocator: Allocator) !?[]const u8 {
     var args = try std.process.argsWithAllocator(allocator);
     _ = args.skip(); // Discard process name
     return if (args.next()) |arg| try allocator.dupe(u8, arg) else null;
-}
-
-fn handlePipedStdin(dt: *DtMachine) !void {
-    dt.handleCmd("dt/pipe-thru-args") catch |e| return doneOrDie(dt, e);
-}
-
-fn handlePipedStdoutOnly(dt: *DtMachine) !void {
-    dt.handleCmd("dt/run-args") catch |e| return doneOrDie(dt, e);
-}
-
-fn readEvalPrintLoop(dt: *DtMachine) !void {
-    dt.handleCmd("dt/run-args") catch |e| return doneOrDie(dt, e);
-
-    // TODO: Can this catch be done in the stdlib? Other people need to catch errors too!
-    while (true) dt.handleCmd("dt/main-repl") catch |e| switch (e) {
-        error.EndOfStream => return,
-        else => {
-            const stderr = std.io.getStdErr().writer();
-            try dt.red();
-            try stderr.print("\nRestarting REPL after error: {s}\n\n", .{@errorName(e)});
-            try dt.norm();
-        },
-    };
 }
 
 fn doneOrDie(dt: *DtMachine, reason: anyerror) !void {
@@ -88,7 +64,7 @@ fn doneOrDie(dt: *DtMachine, reason: anyerror) !void {
             try stderr.print("\nRIP: {any}\n", .{reason});
             try dt.norm();
 
-            std.os.exit(1);
+            osExit(1);
         },
     }
 }

@@ -1,7 +1,7 @@
 { lib
 , stdenv
 , testers
-, zig_0_11
+, zig_0_12
 }:
 
 stdenv.mkDerivation (finalAttrs: {
@@ -10,7 +10,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   src = lib.cleanSource ./.;
 
-  nativeBuildInputs = [ zig_0_11.hook ];
+  nativeBuildInputs = [ zig_0_12.hook ];
 
   passthru.tests.version = testers.testVersion { package = finalAttrs.finalPackage; };
 

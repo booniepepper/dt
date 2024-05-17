@@ -1,5 +1,7 @@
 const std = @import("std");
 const ArrayList = std.ArrayList;
+const osExit = if (@hasDecl(std, "posix")) std.posix.exit else std.os.exit;
+const osChdir = if (@hasDecl(std, "posix")) std.posix.chdir else std.os.chdir;
 
 const interpret = @import("interpret.zig");
 const Command = interpret.Command;
@@ -139,7 +141,7 @@ pub fn quit(dt: *DtMachine) !void {
         try dt.norm();
     }
 
-    std.os.exit(0);
+    osExit(0);
 }
 
 test "drop quit" {
@@ -172,7 +174,7 @@ pub fn exit(dt: *DtMachine) !void {
     }
 
     const code: u8 = @intCast(i);
-    std.os.exit(code);
+    osExit(code);
 }
 
 test "7 exit" {
@@ -225,7 +227,7 @@ pub fn cd(dt: *DtMachine) !void {
         path = try std.process.getEnvVarOwned(dt.alloc, "HOME");
     }
 
-    std.os.chdir(path) catch |e| return dt.rewind(log, val, e);
+    osChdir(path) catch |e| return dt.rewind(log, val, e);
 }
 
 test "\".\" cd" {

@@ -1,10 +1,10 @@
 const std = @import("std");
-const LazyPath = if (@hasDecl(std.Build, "LazyPath")) std.Build.LazyPath else std.Build.FileSource;
+const Build = if (@hasDecl(std, "Build")) std.Build else std.build.Builder;
 
-pub fn build(b: *std.Build) !void {
+pub fn build(b: *Build) !void {
     const target = b.standardTargetOptions(.{});
-    const optimize = b.standardOptimizeOption(.{});
-    const root_source_file = LazyPath.relative("src/main.zig");
+    const optimize = if (comptime @hasDecl(Build, "standardOptimizeOption")) b.standardOptimizeOption(.{}) else b.standardReleaseOptions();
+    const root_source_file = if (@hasDecl(Build, "path")) b.path("src/main.zig") else Build.LazyPath.relative("src/main.zig");
 
     // Dt executable
     const dt_step = b.step("dt", "Install dt executable");
@@ -16,7 +16,9 @@ pub fn build(b: *std.Build) !void {
         .target = target,
     });
 
-    const dt_install = b.addInstallArtifact(dt, .{});
+    const dt_install =
+        b.addInstallArtifact(dt, .{});
+
     dt_step.dependOn(&dt_install.step);
     b.default_step.dependOn(dt_step);
 
@@ -28,7 +30,7 @@ pub fn build(b: *std.Build) !void {
 
         const query = try std.zig.CrossTarget.parse(.{ .arch_os_abi = TRIPLE });
 
-        const cross: *std.Build.Step.Compile = b.addExecutable(.{
+        const cross = b.addExecutable(.{
             .name = exe,
             .root_source_file = root_source_file,
             .optimize = optimize,
@@ -40,9 +42,11 @@ pub fn build(b: *std.Build) !void {
                 query,
         });
 
-        const cross_install = b.addInstallArtifact(cross, .{});
+        const cross_install =
+            b.addInstallArtifact(cross, .{});
 
-        const exe_filename = if (query.cpu_arch == .wasm32) exe ++ ".wasm" else if (query.os_tag == .windows) exe ++ ".exe" else exe;
+        const is_wasm = if (query.cpu_arch) |arch| arch.isWasm() else false;
+        const exe_filename = if (is_wasm) exe ++ ".wasm" else if (query.os_tag == .windows) exe ++ ".exe" else exe;
 
         const cross_tar = b.addSystemCommand(&.{
             "tar", "--transform", "s|" ++ exe ++ "|dt|", "-czvf", exe ++ ".tgz", exe_filename,
@@ -52,7 +56,7 @@ pub fn build(b: *std.Build) !void {
             // Zig 0.12.0
             cross_tar.setCwd(.{ .path = "./zig-out/bin/" });
         } else {
-            // Zig 0.11.0
+            // Zig 0.11
             cross_tar.cwd = "./zig-out/bin/";
         }
 
@@ -63,7 +67,8 @@ pub fn build(b: *std.Build) !void {
     // Tests
     const test_step = b.step("test", "Run tests");
 
-    const test_exe = b.addTest(.{
+    const test_exe =
+        b.addTest(.{
         .root_source_file = root_source_file,
         .optimize = optimize,
         .target = target,

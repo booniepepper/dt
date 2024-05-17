@@ -13,14 +13,14 @@ jobs:
   compile:
     strategy:
       matrix:
-        zig_version: [0.11.0, master]
-        os: [ubuntu-latest]
+        zig_version: [0.11.0, 0.12.0]
         experimental: [false]
+        os: [ubuntu-latest]
         include:
           - zig_version: 0.11.0
             os: windows-latest
             experimental: true
-          - zig_version: master
+          - zig_version: 0.12.0
             os: windows-latest
             experimental: true
 

@@ -1,5 +1,5 @@
 .{
     .name = "dt",
-    .version = "1.3.1", // Update in main.zig as well
-    .paths = .{ "" },
+    .version = "2.0.0-rc", // Update in main.zig as well
+    .paths = .{""},
 }

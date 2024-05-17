@@ -16,7 +16,7 @@
     in {
       packages.default = dt;
       devShells.default = pkgs.mkShell {
-        packages = with pkgs; [ zig_0_11 ];
+        packages = with pkgs; [ zig_0_12 ];
       };
     });
 }

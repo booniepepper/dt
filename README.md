@@ -2,8 +2,9 @@
 [![unconventions.org](https://img.shields.io/badge/unconventions-%E7%84%A1%E9%99%90-orange)](https://unconventions.org)
 [![justforfunnoreally.dev badge](https://img.shields.io/badge/justforfunnoreally-dev-9ff)](https://justforfunnoreally.dev)
 
-
 # dt
+
+<img alt='dt' align='right' src='https://raw.githubusercontent.com/so-dang-cool/dt/core/img/dt-logo-white.svg' height='128' width='128'>
 
 It's duct tape for your unix pipes. A programming language for doing small
 stuff fast, easy, and readable.

@@ -333,7 +333,7 @@ pub fn writef(dt: *DtMachine) !void {
     const theCwdPath = try std.process.getCwdAlloc(dt.alloc);
     var theCwd = try std.fs.openDirAbsolute(theCwdPath, .{});
 
-    try theCwd.writeFile(filename, contents);
+    try theCwd.writeFile(.{ .data = contents, .sub_path = filename });
     theCwd.close();
 }
 

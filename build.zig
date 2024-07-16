@@ -52,17 +52,18 @@ pub fn build(b: *Build) !void {
             "tar", "--transform", "s|" ++ exe ++ "|dt|", "-czvf", exe ++ ".tgz", exe_filename,
         });
 
+        const zig_out_bin = "./zig-out/bin/";
         if (comptime @hasDecl(@TypeOf(cross_tar.*), "setCwd")) {
             if (comptime @hasDecl(Build, "path")) {
                 // Zig 0.13.0
-                cross_tar.setCwd(b.path("./zig-out/bin/"));
+                cross_tar.setCwd(b.path(zig_out_bin));
             } else {
                 // Zig 0.12.0
-                cross_tar.setCwd(.{ .path = "./zig-out/bin/" });
+                cross_tar.setCwd(.{ .path = zig_out_bin });
             }
         } else {
             // Zig 0.11
-            cross_tar.cwd = "./zig-out/bin/";
+            cross_tar.cwd = zig_out_bin;
         }
 
         cross_tar.step.dependOn(&cross_install.step);

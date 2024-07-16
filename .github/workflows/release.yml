@@ -8,12 +8,12 @@ jobs:
 
     steps:
       - name: Set up Zig
-        uses: goto-bus-stop/setup-zig@v2.1.0
+        uses: goto-bus-stop/setup-zig@v2
         with:
-          version: 0.12.0
+          version: 0.13.0
 
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: zig build test
         run: |

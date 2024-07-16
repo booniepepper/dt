@@ -20,12 +20,12 @@ jobs:
 
     steps:
       - name: Set up Zig
-        uses: goto-bus-stop/setup-zig@v2.1.0
+        uses: goto-bus-stop/setup-zig@v2
         with:
           version: ${{ matrix.zig_version }}
 
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: zig build
         run: |

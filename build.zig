@@ -53,8 +53,13 @@ pub fn build(b: *Build) !void {
         });
 
         if (comptime @hasDecl(@TypeOf(cross_tar.*), "setCwd")) {
-            // Zig 0.12.0
-            cross_tar.setCwd(b.path("./zig-out/bin/"));
+            if (comptime @hasDecl(Build, "path")) {
+                // Zig 0.13.0
+                cross_tar.setCwd(b.path("./zig-out/bin/"));
+            } else {
+                // Zig 0.12.0
+                cross_tar.setCwd(.{ .path = "./zig-out/bin/" });
+            }
         } else {
             // Zig 0.11
             cross_tar.cwd = "./zig-out/bin/";

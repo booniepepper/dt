@@ -333,7 +333,14 @@ pub fn writef(dt: *DtMachine) !void {
     const theCwdPath = try std.process.getCwdAlloc(dt.alloc);
     var theCwd = try std.fs.openDirAbsolute(theCwdPath, .{});
 
-    try theCwd.writeFile(.{ .data = contents, .sub_path = filename });
+    const Dir = std.fs.Dir;
+    if (comptime @hasDecl(Dir, "WriteFileOptions") and @typeInfo(@TypeOf(Dir.writeFile)).Fn.params[1].type == Dir.WriteFileOptions) {
+        // Zig 0.13
+        try theCwd.writeFile(.{ .data = contents, .sub_path = filename });
+    } else {
+        // Zig 0.12, 0.11
+        try theCwd.writeFile(filename, contents);
+    }
     theCwd.close();
 }
 
